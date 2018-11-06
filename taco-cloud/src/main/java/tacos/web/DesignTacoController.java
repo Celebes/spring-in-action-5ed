@@ -2,6 +2,7 @@ package tacos.web;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -14,10 +15,13 @@ import tacos.Ingredient;
 import tacos.Ingredient.Type;
 import tacos.Order;
 import tacos.Taco;
+import tacos.User;
 import tacos.data.IngredientRepository;
 import tacos.data.TacoRepository;
+import tacos.data.UserRepository;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,15 +36,19 @@ public class DesignTacoController {
 
     private TacoRepository tacoRepository;
 
+    private UserRepository userRepository;
+
     @Autowired
     public DesignTacoController(IngredientRepository ingredientRepository,
-                                TacoRepository tacoRepository) {
+                                TacoRepository tacoRepository,
+                                UserRepository userRepository) {
         this.ingredientRepository = ingredientRepository;
         this.tacoRepository = tacoRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
-    public String showDesignForm(Model model) {
+    public String showDesignForm(Model model, @AuthenticationPrincipal User user) {
         List<Ingredient> ingredients = new ArrayList<>();
         ingredientRepository.findAll().forEach(i -> ingredients.add(i));
 
@@ -49,6 +57,8 @@ public class DesignTacoController {
             model.addAttribute(type.toString().toLowerCase(),
                     filterByType(ingredients, type));
         }
+
+        model.addAttribute("user", user);
 
         return "design";
     }
@@ -71,9 +81,8 @@ public class DesignTacoController {
     }
 
     @PostMapping
-    public String processDesign(@Valid Taco taco,
-                                @ModelAttribute Order order,
-                                Errors errors) {
+    public String processDesign(@Valid Taco taco, Errors errors,
+                                @ModelAttribute Order order) {
         if (errors.hasErrors()) {
             return "design";
         }

@@ -1,18 +1,9 @@
 package tacos;
 
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.CreditCardNumber;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -58,6 +49,9 @@ public class Order implements Serializable {
 
     @Digits(integer = 3, fraction = 0, message = "Invalid CVV")
     private String ccCVV;
+
+    @ManyToOne
+    private User user;
 
     @ManyToMany
     private List<Taco> tacos = new ArrayList<>();
